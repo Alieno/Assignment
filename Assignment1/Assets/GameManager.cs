@@ -66,7 +66,38 @@ public class GameManager : MonoBehaviour
 
 	void Update()
 	{
-		if (Input.GetMouseButtonDown(0)||Input.GetMouseButton(0))
+		OnMapClick();
+		DrawColor();
+	}
+
+	private void DrawColor()
+	{
+		for (int i = 0; i < 10; i++)
+		{
+			for (int j = 0; j < 10; j++)
+			{
+				switch (m_Map[i,j])
+				{
+					case (int) MAPMARKER.START:
+						m_Box[i,j].GetComponent<MeshRenderer>().material.color = Color.red;
+						break;
+					case (int) MAPMARKER.END:
+						m_Box[i,j].GetComponent<MeshRenderer>().material.color = Color.blue;
+						break;
+					case (int) MAPMARKER.OBSTACLE:
+						m_Box[i,j].GetComponent<MeshRenderer>().material.color = Color.black;
+						break;
+					case (int) MAPMARKER.NONE:
+						m_Box[i,j].GetComponent<MeshRenderer>().material.color = Color.white;
+						break;
+				}
+			}
+		}
+	}
+
+	private void OnMapClick()
+	{
+		if (Input.GetMouseButtonDown(0) || Input.GetMouseButton(0))
 		{
 			if (Camera.main != null)
 			{
@@ -79,17 +110,13 @@ public class GameManager : MonoBehaviour
 					int tmpY = (int) hitObj.transform.position.y;
 					if (m_Start)
 					{
-						
-
-						
-						if (m_Map[tmpX, tmpY] == (int)MAPMARKER.NONE)
+						if (m_Map[tmpX, tmpY] == (int) MAPMARKER.NONE)
 						{
-							hitObj.GetComponent<MeshRenderer>().material.color = Color.red;
 							if (m_StartX >= 0)
 							{
-								m_Box[m_StartX, m_StartY].GetComponent<MeshRenderer>().material.color = Color.white;
 								m_Map[m_StartX, m_StartY] = (int) MAPMARKER.NONE;
 							}
+
 							m_StartX = tmpX;
 							m_StartY = tmpY;
 							m_Map[m_StartX, m_StartY] = (int) MAPMARKER.START;
@@ -98,13 +125,10 @@ public class GameManager : MonoBehaviour
 
 					if (m_End)
 					{
-
-						if (m_Map[tmpX, tmpY] == (int)MAPMARKER.NONE)
+						if (m_Map[tmpX, tmpY] == (int) MAPMARKER.NONE)
 						{
-							hitObj.GetComponent<MeshRenderer>().material.color = Color.blue;
 							if (m_EndX >= 0)
 							{
-								m_Box[m_EndX, m_EndY].GetComponent<MeshRenderer>().material.color = Color.white;
 								m_Map[m_EndX, m_EndY] = (int) MAPMARKER.NONE;
 							}
 
@@ -112,14 +136,12 @@ public class GameManager : MonoBehaviour
 							m_EndY = tmpY;
 							m_Map[m_EndX, m_EndY] = (int) MAPMARKER.END;
 						}
-
 					}
 
 					if (m_Obstacle)
 					{
-						if (m_Map[tmpX, tmpY] == (int)MAPMARKER.NONE)
+						if (m_Map[tmpX, tmpY] == (int) MAPMARKER.NONE)
 						{
-							hitObj.GetComponent<MeshRenderer>().material.color = Color.black;
 							m_Map[tmpX, tmpY] = (int) MAPMARKER.OBSTACLE;
 						}
 					}
@@ -128,30 +150,28 @@ public class GameManager : MonoBehaviour
 					{
 						if (m_Map[tmpX, tmpY] != (int) MAPMARKER.NONE)
 						{
-							hitObj.GetComponent<MeshRenderer>().material.color = Color.white;
 							switch (m_Map[tmpX, tmpY])
 							{
-								case (int)MAPMARKER.START:
+								case (int) MAPMARKER.START:
 									m_StartX = -1;
 									m_StartY = -1;
 									m_Map[tmpX, tmpY] = (int) MAPMARKER.NONE;
 									break;
-								case (int)MAPMARKER.END:
+								case (int) MAPMARKER.END:
 									m_EndX = -1;
 									m_EndY = -1;
 									m_Map[tmpX, tmpY] = (int) MAPMARKER.NONE;
 									break;
-								case (int)MAPMARKER.OBSTACLE:
+								case (int) MAPMARKER.OBSTACLE:
 									m_Map[tmpX, tmpY] = (int) MAPMARKER.NONE;
 									break;
 							}
 						}
-						
-						
 					}
 				}
 			}
 		}
+
 	}
 
 	void OnToggleAStarClick(bool isOn)
