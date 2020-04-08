@@ -102,8 +102,8 @@ public class GameManager : MonoBehaviour
 			if (Camera.main != null)
 			{
 				Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-				RaycastHit hitInfo;
-				if (Physics.Raycast(ray, out hitInfo))
+				RaycastHit2D hitInfo = Physics2D.Raycast(ray.origin, ray.direction);
+				if (hitInfo)
 				{
 					GameObject hitObj = hitInfo.collider.gameObject;
 					int tmpX = (int) hitObj.transform.position.x;
