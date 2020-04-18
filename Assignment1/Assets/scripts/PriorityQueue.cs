@@ -50,20 +50,24 @@ public class CBT<T>
         return index >= 0 && index < m_size;
     }
 };
-
-public class PriorityQueue<KT, VT, OP> : CBT<KeyValuePair<KT, VT>> where KT : struct where OP : IComparer<KT>
+public class PriorityQueue<KT, VT> : CBT<KeyValuePair<KT, VT>> where KT : struct
 {
 	//using ValueType = KeyValuePair<KT, VT>;
 	//using PosMap = Dictionary<VT, KeyValuePair<KT, int>>;
 
 	Dictionary<VT, KeyValuePair<KT, int>> m_pos = new Dictionary<VT, KeyValuePair<KT, int>>();
-    ValueCompare m_comp;
+    ValueCompare m_comp = new ValueCompare();
 
-    PriorityQueue() : base()
+    public PriorityQueue() : base()
 	{
 	}
 
-	PriorityQueue(List<KeyValuePair<KT, VT>> A) : base()
+    public PriorityQueue(IComparer comparer) : base()
+    {
+		m_comp = new ValueCompare(comparer);
+    }
+
+    public PriorityQueue(List<KeyValuePair<KT, VT>> A) : base()
 	{
 		m_data = A;
 		m_size = m_data.Count;
@@ -126,6 +130,11 @@ public class PriorityQueue<KT, VT, OP> : CBT<KeyValuePair<KT, VT>> where KT : st
 		return true;
 	}
 
+	public bool Empty()
+	{
+		return m_size == 0;
+	}
+
 	virtual protected void Heapify(int index)
 	{
 		if (!Check(index))
@@ -173,12 +182,20 @@ public class PriorityQueue<KT, VT, OP> : CBT<KeyValuePair<KT, VT>> where KT : st
 
     private class ValueCompare
 	{
+        public ValueCompare()
+        {
+        }
+
+        public ValueCompare(IComparer comparer)
+		{
+			m_comp = comparer;
+		}
+
 		public int Compare(KeyValuePair<KT, VT> left, KeyValuePair<KT, VT> right)
 		{
 			return m_comp.Compare(left.Key, right.Key);
 		}
 
-		protected OP m_comp;
+		protected IComparer m_comp = Comparer<KT>.Default;
 	};
 };
-
