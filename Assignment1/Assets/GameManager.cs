@@ -11,7 +11,7 @@ public class GameManager : MonoBehaviour
 		NONE = 0,
 		START = 1,
 		END = 2,
-		OBSTACLE = 3
+		OBSTACLE = -1
 		
 	}
 	public GameObject Parent;
@@ -110,60 +110,60 @@ public class GameManager : MonoBehaviour
 					int tmpY = (int) hitObj.transform.position.y;
 					if (m_Start)
 					{
-						if (m_Map[tmpX, tmpY] == (int) MAPMARKER.NONE)
+						if (m_Map[tmpX,tmpY] == (int) MAPMARKER.NONE)
 						{
 							if (m_StartX >= 0)
 							{
-								m_Map[m_StartX, m_StartY] = (int) MAPMARKER.NONE;
+								m_Map[m_StartX,m_StartY] = (int) MAPMARKER.NONE;
 							}
 
 							m_StartX = tmpX;
 							m_StartY = tmpY;
-							m_Map[m_StartX, m_StartY] = (int) MAPMARKER.START;
+							m_Map[m_StartX,m_StartY] = (int) MAPMARKER.START;
 						}
 					}
 
 					if (m_End)
 					{
-						if (m_Map[tmpX, tmpY] == (int) MAPMARKER.NONE)
+						if (m_Map[tmpX,tmpY] == (int) MAPMARKER.NONE)
 						{
 							if (m_EndX >= 0)
 							{
-								m_Map[m_EndX, m_EndY] = (int) MAPMARKER.NONE;
+								m_Map[m_EndX,m_EndY] = (int) MAPMARKER.NONE;
 							}
 
 							m_EndX = tmpX;
 							m_EndY = tmpY;
-							m_Map[m_EndX, m_EndY] = (int) MAPMARKER.END;
+							m_Map[m_EndX,m_EndY] = (int) MAPMARKER.END;
 						}
 					}
 
 					if (m_Obstacle)
 					{
-						if (m_Map[tmpX, tmpY] == (int) MAPMARKER.NONE)
+						if (m_Map[tmpX,tmpY] == (int) MAPMARKER.NONE)
 						{
-							m_Map[tmpX, tmpY] = (int) MAPMARKER.OBSTACLE;
+							m_Map[tmpX,tmpY] = (int) MAPMARKER.OBSTACLE;
 						}
 					}
 
 					if (m_Clear)
 					{
-						if (m_Map[tmpX, tmpY] != (int) MAPMARKER.NONE)
+						if (m_Map[tmpX,tmpY] != (int) MAPMARKER.NONE)
 						{
-							switch (m_Map[tmpX, tmpY])
+							switch (m_Map[tmpX,tmpY])
 							{
 								case (int) MAPMARKER.START:
 									m_StartX = -1;
 									m_StartY = -1;
-									m_Map[tmpX, tmpY] = (int) MAPMARKER.NONE;
+									m_Map[tmpX,tmpY] = (int) MAPMARKER.NONE;
 									break;
 								case (int) MAPMARKER.END:
 									m_EndX = -1;
 									m_EndY = -1;
-									m_Map[tmpX, tmpY] = (int) MAPMARKER.NONE;
+									m_Map[tmpX,tmpY] = (int) MAPMARKER.NONE;
 									break;
 								case (int) MAPMARKER.OBSTACLE:
-									m_Map[tmpX, tmpY] = (int) MAPMARKER.NONE;
+									m_Map[tmpX,tmpY] = (int) MAPMARKER.NONE;
 									break;
 							}
 						}
@@ -204,4 +204,17 @@ public class GameManager : MonoBehaviour
 		m_JPS = isOn;
 	}
 
+	public void OnFindPathBtnClick()
+	{
+		StartCoroutine(CalculatePath());
+
+	}
+
+	IEnumerator CalculatePath()
+	{
+		
+		var tmp = AStar.Calculate(m_Map, m_StartX, m_StartY, m_EndX, m_EndY);
+		Debug.Log(tmp);
+		yield return null;
+	}
 }

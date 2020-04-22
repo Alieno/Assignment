@@ -33,10 +33,10 @@ public struct Pos
 public class AStar
 {
     static private PriorityQueue<int, Pos> m_openList = new PriorityQueue<int, Pos>();
-    static private List<List<int>> F = new List<List<int>>();
-    static private List<List<int>> G = new List<List<int>>();
-    static private List<List<int>> H = new List<List<int>>();
-    static private List<List<bool>> closeList = new List<List<bool>>();
+    static private int[,] F;
+    static private int[,] G;
+    static private int[,] H;
+    static private bool[,] closeList;
 
     static private Pos[] offset = { new Pos(-1, 0),
                                     new Pos(0, -1),
@@ -47,14 +47,14 @@ public class AStar
                                     new Pos(1, -1),
                                     new Pos(1, 1)};
 
-    public static int Calculate(List<List<int>> matrix, int startX, int startY, int endX, int endY)
+    public static int Calculate(int[,] matrix, int startX, int startY, int endX, int endY)
     {
-        int m = matrix.Count;
+        int m = matrix.GetLength(0);
         if (m == 0)
         {
             return 0;
         }
-        int n = matrix[0].Count;
+        int n = matrix.GetLength(1);
         if (n == 0)
         {
             return 0;
@@ -64,26 +64,28 @@ public class AStar
         Debug.Assert(endX >= 0 && endX < m);
         Debug.Assert(endY >= 0 && endY < n);
 
+        F = new int[m, n];
+        G = new int[m, n];
+        H = new int[m, n];
+        closeList = new bool[m, n];
+        
+        m_openList = new PriorityQueue<int, Pos>();
         for (int i = 0; i < m; ++i)
         {
-            F.Add(new List<int>());
-            G.Add(new List<int>());
-            H.Add(new List<int>());
-            closeList.Add(new List<bool>());
             for (int j = 0; j < n; ++j)
             {
-                F[i].Add(-1);
-                G[i].Add(-1);
-                H[i].Add(GuessDis(i, j, endX, endY));
-                closeList[i].Add(false);
+                F[i, j] = -1;
+                G[i, j] = -1;
+                H[i, j] = GuessDis(i, j, endX, endY);
+                closeList[i, j] = false;
             }
         }
 
-        G[startX][startY] = 0;
-        F[startX][startY] = G[startX][startY] + H[startX][startY];
+        G[startX, startY] = 0;
+        F[startX, startY] = G[startX, startY] + H[startX, startY];
         Pos start = new Pos(startX, startY);
         Pos end = new Pos(endX, endY);
-        m_openList.Insert(F[startX][startY], start);
+        m_openList.Insert(F[startX, startY], start);
         while (!m_openList.Empty())
         {
             var item = m_openList.Extract();
@@ -91,7 +93,7 @@ public class AStar
             {
                 break;
             }
-            closeList[item.Value.x][item.Value.y] = true;
+            closeList[item.Value.x, item.Value.y] = true;
 
             for (int i = 0; i < offset.Length; ++i)
             {
@@ -100,27 +102,27 @@ public class AStar
                 {
                     continue;
                 }
-                if (closeList[tmp.x][tmp.y] || matrix[tmp.x][tmp.y] < 0)
+                if (closeList[tmp.x, tmp.y] || matrix[tmp.x, tmp.y] < 0)
                 {
                     continue;
                 }
-                int cost = G[item.Value.x][item.Value.y] + (i >= 4 ? 14 : 10);
-                if (G[tmp.x][tmp.y] == -1)
+                int cost = G[item.Value.x, item.Value.y] + (i >= 4 ? 14 : 10);
+                if (G[tmp.x, tmp.y] == -1)
                 {
-                    G[tmp.x][tmp.y] = cost;
-                    F[tmp.x][tmp.y] = G[tmp.x][tmp.y] + H[tmp.x][tmp.y];
-                    m_openList.Insert(F[tmp.x][tmp.y], tmp);
+                    G[tmp.x, tmp.y] = cost;
+                    F[tmp.x, tmp.y] = G[tmp.x, tmp.y] + H[tmp.x, tmp.y];
+                    m_openList.Insert(F[tmp.x, tmp.y], tmp);
                 }
-                else if (G[tmp.x][tmp.y] > cost)
+                else if (G[tmp.x, tmp.y] > cost)
                 {
-                    G[tmp.x][tmp.y] = cost;
-                    F[tmp.x][tmp.y] = G[tmp.x][tmp.y] + H[tmp.x][tmp.y];
-                    m_openList.Promote(tmp, F[tmp.x][tmp.y]);
+                    G[tmp.x, tmp.y] = cost;
+                    F[tmp.x, tmp.y] = G[tmp.x, tmp.y] + H[tmp.x, tmp.y];
+                    m_openList.Promote(tmp, F[tmp.x, tmp.y]);
                 }
             }
         }
 
-        return G[endX][endY];
+        return G[endX, endY];
     }
 
     static private int GuessDis(int posX, int posY, int endX, int endY)
@@ -128,6 +130,6 @@ public class AStar
         int disX = Math.Abs(endX - posX);
         int disY = Math.Abs(endY - posY);
         int minDir = Math.Min(disX, disY);
-        return 14 * minDir + (disX - minDir) + (disY - minDir);
+        return 14 * minDir + 10 * ((disX - minDir) + (disY - minDir));
     }
 }
