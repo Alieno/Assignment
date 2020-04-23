@@ -29,7 +29,13 @@ public struct Pos
         return !(a == b);
     }
 }
-
+public class Less<T> : IComparer
+{
+    int IComparer.Compare(object x, object y)
+    {
+        return -Comparer<T>.Default.Compare((T)x, (T)y);
+    }
+}
 public class AStar
 {
     static private PriorityQueue<int, Pos> m_openList = new PriorityQueue<int, Pos>();
@@ -37,6 +43,7 @@ public class AStar
     static private int[,] G;
     static private int[,] H;
     static private bool[,] closeList;
+    static private Pos[,] parent;
 
     static private Pos[] offset = { new Pos(-1, 0),
                                     new Pos(0, -1),
@@ -68,8 +75,9 @@ public class AStar
         G = new int[m, n];
         H = new int[m, n];
         closeList = new bool[m, n];
-        
-        m_openList = new PriorityQueue<int, Pos>();
+        parent = new Pos[m, n];
+
+        m_openList = new PriorityQueue<int, Pos>(new Less<int>());
         for (int i = 0; i < m; ++i)
         {
             for (int j = 0; j < n; ++j)
@@ -78,9 +86,11 @@ public class AStar
                 G[i, j] = -1;
                 H[i, j] = GuessDis(i, j, endX, endY);
                 closeList[i, j] = false;
+                parent[i, j] = new Pos(i, j);
             }
         }
 
+        parent[startX, startY] = new Pos(startX, startY);
         G[startX, startY] = 0;
         F[startX, startY] = G[startX, startY] + H[startX, startY];
         Pos start = new Pos(startX, startY);
@@ -112,17 +122,32 @@ public class AStar
                     G[tmp.x, tmp.y] = cost;
                     F[tmp.x, tmp.y] = G[tmp.x, tmp.y] + H[tmp.x, tmp.y];
                     m_openList.Insert(F[tmp.x, tmp.y], tmp);
+                    parent[tmp.x, tmp.y] = new Pos(item.Value.x, item.Value.y);
                 }
                 else if (G[tmp.x, tmp.y] > cost)
                 {
                     G[tmp.x, tmp.y] = cost;
                     F[tmp.x, tmp.y] = G[tmp.x, tmp.y] + H[tmp.x, tmp.y];
                     m_openList.Promote(tmp, F[tmp.x, tmp.y]);
+                    parent[tmp.x, tmp.y] = new Pos(item.Value.x, item.Value.y);
                 }
             }
         }
 
+        UpdatePath(matrix, startX, startY, parent[endX, endY].x, parent[endX, endY].y);
+
         return G[endX, endY];
+    }
+
+    static void UpdatePath(int[,] matrix, int startX, int startY, int x, int y)
+    {
+        if (x == startX && y == startY)
+        {
+            return;
+        }
+
+        matrix[x, y] = 3;
+        UpdatePath(matrix, startX, startY, parent[x, y].x, parent[x,y].y);
     }
 
     static private int GuessDis(int posX, int posY, int endX, int endY)

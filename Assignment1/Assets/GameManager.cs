@@ -11,8 +11,8 @@ public class GameManager : MonoBehaviour
 		NONE = 0,
 		START = 1,
 		END = 2,
-		OBSTACLE = -1
-		
+		OBSTACLE = -1,
+		PATH = 3
 	}
 	public GameObject Parent;
 	public GameObject Box;
@@ -90,6 +90,9 @@ public class GameManager : MonoBehaviour
 					case (int) MAPMARKER.NONE:
 						m_Box[i,j].GetComponent<MeshRenderer>().material.color = Color.white;
 						break;
+					case (int) MAPMARKER.PATH:
+						m_Box[i, j].GetComponent<MeshRenderer>().material.color = Color.yellow;
+						break;
 				}
 			}
 		}
@@ -140,7 +143,7 @@ public class GameManager : MonoBehaviour
 
 					if (m_Obstacle)
 					{
-						if (m_Map[tmpX,tmpY] == (int) MAPMARKER.NONE)
+						if (m_Map[tmpX,tmpY] != (int) MAPMARKER.START && m_Map[tmpX, tmpY] != (int) MAPMARKER.END)
 						{
 							m_Map[tmpX,tmpY] = (int) MAPMARKER.OBSTACLE;
 						}
@@ -207,12 +210,20 @@ public class GameManager : MonoBehaviour
 	public void OnFindPathBtnClick()
 	{
 		StartCoroutine(CalculatePath());
-
 	}
 
 	IEnumerator CalculatePath()
 	{
-		
+		for (int i = 0; i < 10; ++i)
+		{
+			for (int j = 0; j < 10; ++j)
+			{
+				if (m_Map[i, j] == (int)MAPMARKER.PATH)
+				{
+					m_Map[i, j] = (int)MAPMARKER.NONE;
+				}
+			}
+		}
 		var tmp = AStar.Calculate(m_Map, m_StartX, m_StartY, m_EndX, m_EndY);
 		Debug.Log(tmp);
 		yield return null;
