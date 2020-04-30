@@ -54,6 +54,11 @@ public class AStar
                                     new Pos(1, -1),
                                     new Pos(1, 1)};
 
+    static public Pos[,] Parent
+    {
+        get { return parent; }
+    }
+
     public static int Calculate(int[,] matrix, int startX, int startY, int endX, int endY)
     {
         int m = matrix.GetLength(0);
@@ -134,7 +139,7 @@ public class AStar
             }
         }
 
-        UpdatePath(matrix, startX, startY, parent[endX, endY].x, parent[endX, endY].y);
+        // UpdatePath(matrix, startX, startY, parent[endX, endY].x, parent[endX, endY].y);
 
         return G[endX, endY];
     }

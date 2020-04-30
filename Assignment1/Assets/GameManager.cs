@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -23,11 +24,12 @@ public class GameManager : MonoBehaviour
 	public Toggle ToggleEnd;
 	public Toggle ToggleObstacle;
 	public Toggle ToggleClear;
+
+	public Text TimeUsed;
+	public Slider SizeSlider;
 	
-	
-	
-	private GameObject[,] m_Box = new GameObject[10, 10];
-	private int[,] m_Map = new int[10,10];
+	private GameObject[,] m_Box = new GameObject[100, 100];
+	private int[,] m_Map = new int[100,100];
 	
 	private bool m_Start = true;
 	private bool m_End = false;
@@ -40,19 +42,36 @@ public class GameManager : MonoBehaviour
 	private int m_StartY = -1;
 	private int m_EndX = -1;
 	private int m_EndY = -1;
-	
+
+	private int m_Size = 10;
+
+	private bool m_IsPlaying = false;
+	private int m_DrawX = 0;
+	private int m_DrawY = 0;
 	
 	void Start () {
-		for (int i = 0; i < 10; i++)
+		m_IsPlaying = false;
+		for (int i = 0; i < 100; i++)
 		{
-			for (int j = 0; j < 10; j++)
+			for (int j = 0; j < 100; j++)
 			{
 				GameObject box = Instantiate<GameObject>(Box, Parent.transform);
 				box.transform.Translate(new Vector3(i,j,0));
 				m_Box[i,j] = box;
+				if (i >= m_Size || j >= m_Size)
+				{
+					m_Map[i, j] = (int) MAPMARKER.OBSTACLE;
+					m_Box[i, j].SetActive(false);
+				}
+				else
+				{
+					m_Map[i, j] = (int) MAPMARKER.NONE;
+				}
 			}
 		}
+		
 		Box.SetActive(false);
+		DrawColor();
 		ToggleAStar.onValueChanged.AddListener((bool isOn)=> { OnToggleAStarClick(isOn); });
 		ToggleJPS.onValueChanged.AddListener((bool isOn)=> { OnToggleJPSClick(isOn); });
 		ToggleStart.onValueChanged.AddListener((bool isOn)=> { OnToggleStartClick(isOn); });
@@ -66,15 +85,76 @@ public class GameManager : MonoBehaviour
 
 	void Update()
 	{
+		if (m_IsPlaying)
+		{
+			UpdatePath();
+		}
 		OnMapClick();
 		DrawColor();
 	}
 
+	private void UpdatePath()
+	{
+		if (m_DrawX == m_StartX && m_DrawY == m_StartY)
+		{
+			m_IsPlaying = false;
+		}
+		else
+		{
+			if (!(m_DrawX == m_EndX && m_DrawY == m_EndY))
+			{
+				m_Map[m_DrawX, m_DrawY] = 3;
+
+			}
+
+			var tmpX = m_DrawX;
+			var tmpY = m_DrawY;
+			m_DrawX = AStar.Parent[tmpX, tmpY].x;
+			m_DrawY = AStar.Parent[tmpX, tmpY].y;
+			// Debug.Log(m_DrawX+":"+m_DrawY);
+		}
+	}
+
+	public void OnSliderValueChanged()
+	{
+		if (m_Size > (int) SizeSlider.value)
+		{
+			for (int i = (int) SizeSlider.value; i < m_Size; i++)
+			{
+				for (int j = 0; j < m_Size; j++)
+				{
+					m_Map[i, j] = (int) MAPMARKER.OBSTACLE;
+					m_Map[j, i] = (int) MAPMARKER.OBSTACLE;
+					m_Box[i, j].SetActive(false);
+					m_Box[j, i].SetActive(false);
+
+				}
+			}
+		}
+		else
+		{
+			for (int i = m_Size; i < (int) SizeSlider.value; i++)
+			{
+				for (int j = 0; j < (int) SizeSlider.value; j++)
+				{
+					m_Map[i, j] = (int) MAPMARKER.NONE;
+					m_Map[j, i] = (int) MAPMARKER.NONE;
+					m_Box[i, j].SetActive(true);
+					m_Box[j, i].SetActive(true);
+				}
+			}
+		}
+
+		m_Size = (int) SizeSlider.value;
+		Camera.main.orthographicSize = m_Size / 2f;
+		Camera.main.transform.position = new Vector3((m_Size - 1) / 3f, 0.5f * (m_Size - 1), -10);
+	}
+
 	private void DrawColor()
 	{
-		for (int i = 0; i < 10; i++)
+		for (int i = 0; i < SizeSlider.value; i++)
 		{
-			for (int j = 0; j < 10; j++)
+			for (int j = 0; j < SizeSlider.value; j++)
 			{
 				switch (m_Map[i,j])
 				{
@@ -214,9 +294,9 @@ public class GameManager : MonoBehaviour
 
 	IEnumerator CalculatePath()
 	{
-		for (int i = 0; i < 10; ++i)
+		for (int i = 0; i < SizeSlider.value; ++i)
 		{
-			for (int j = 0; j < 10; ++j)
+			for (int j = 0; j < SizeSlider.value; ++j)
 			{
 				if (m_Map[i, j] == (int)MAPMARKER.PATH)
 				{
@@ -224,8 +304,14 @@ public class GameManager : MonoBehaviour
 				}
 			}
 		}
+		DateTime before = DateTime.Now;
 		var tmp = AStar.Calculate(m_Map, m_StartX, m_StartY, m_EndX, m_EndY);
+		DateTime after = DateTime.Now;
+		TimeUsed.text = (after - before).ToString();
 		Debug.Log(tmp);
+		m_IsPlaying = true;
+		m_DrawX = m_EndX;
+		m_DrawY = m_EndY;
 		yield return null;
 	}
 }
