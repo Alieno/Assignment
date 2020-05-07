@@ -109,8 +109,17 @@ public class GameManager : MonoBehaviour
 
 			var tmpX = m_DrawX;
 			var tmpY = m_DrawY;
-			m_DrawX = JPS.Parent[tmpX, tmpY].x;
-			m_DrawY = JPS.Parent[tmpX, tmpY].y;
+			if (m_AStar)
+			{
+				m_DrawX = AStar.Parent[tmpX, tmpY].x;
+				m_DrawY = AStar.Parent[tmpX, tmpY].y;
+			}
+			else if(m_JPS)
+			{
+				m_DrawX = JPS.Parent[tmpX, tmpY].x;
+				m_DrawY = JPS.Parent[tmpX, tmpY].y;
+			}
+			
 			// Debug.Log(m_DrawX+":"+m_DrawY);
 		}
 	}
@@ -305,7 +314,15 @@ public class GameManager : MonoBehaviour
 			}
 		}
 		DateTime before = DateTime.Now;
-		var tmp = JPS.Calculate(m_Map, m_StartX, m_StartY, m_EndX, m_EndY);
+		int tmp = 0;
+		if (m_AStar)
+		{
+			tmp = AStar.Calculate(m_Map, m_StartX, m_StartY, m_EndX, m_EndY);
+		}
+		else if(m_JPS)
+		{
+			tmp = JPS.Calculate(m_Map, m_StartX, m_StartY, m_EndX, m_EndY);
+		}
 		DateTime after = DateTime.Now;
 		TimeUsed.text = (after - before).ToString();
 		Debug.Log(tmp);
