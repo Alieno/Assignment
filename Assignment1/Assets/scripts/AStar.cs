@@ -54,6 +54,8 @@ public class AStar
                                     new Pos(1, -1),
                                     new Pos(1, 1)};
 
+    static public List<Pos> OpenList; 
+    
     static public Pos[,] Parent
     {
         get { return parent; }
@@ -81,7 +83,7 @@ public class AStar
         H = new int[m, n];
         closeList = new bool[m, n];
         parent = new Pos[m, n];
-
+        OpenList = new List<Pos>();
         m_openList = new PriorityQueue<int, Pos>(new Less<int>());
         for (int i = 0; i < m; ++i)
         {
@@ -127,6 +129,7 @@ public class AStar
                     G[tmp.x, tmp.y] = cost;
                     F[tmp.x, tmp.y] = G[tmp.x, tmp.y] + H[tmp.x, tmp.y];
                     m_openList.Insert(F[tmp.x, tmp.y], tmp);
+                    OpenList.Add(tmp);
                     parent[tmp.x, tmp.y] = new Pos(item.Value.x, item.Value.y);
                 }
                 else if (G[tmp.x, tmp.y] > cost)

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -13,7 +14,8 @@ public class GameManager : MonoBehaviour
 		START = 1,
 		END = 2,
 		OBSTACLE = -1,
-		PATH = 3
+		PATH = 3,
+		OPEN = 4,
 	}
 	public GameObject Parent;
 	public GameObject Box;
@@ -45,12 +47,12 @@ public class GameManager : MonoBehaviour
 
 	private int m_Size = 10;
 
-	private bool m_IsPlaying = false;
+	private int m_IsPlaying = 0;
 	private int m_DrawX = 0;
 	private int m_DrawY = 0;
 	
 	void Start () {
-		m_IsPlaying = false;
+		m_IsPlaying = 0;
 		for (int i = 0; i < 100; i++)
 		{
 			for (int j = 0; j < 100; j++)
@@ -85,7 +87,7 @@ public class GameManager : MonoBehaviour
 
 	void Update()
 	{
-		if (m_IsPlaying)
+		if (m_IsPlaying > 0)
 		{
 			UpdatePath();
 		}
@@ -97,30 +99,53 @@ public class GameManager : MonoBehaviour
 	{
 		if (m_DrawX == m_StartX && m_DrawY == m_StartY)
 		{
-			m_IsPlaying = false;
+			m_IsPlaying = 0;
 		}
 		else
 		{
-			if (!(m_DrawX == m_EndX && m_DrawY == m_EndY))
+			if (m_IsPlaying == 1)
 			{
-				m_Map[m_DrawX, m_DrawY] = 3;
+				if (m_AStar)
+				{
+					if (AStar.OpenList.Count > 0)
+					{
+						if (!(AStar.OpenList.First().x == m_EndX && AStar.OpenList.First().y == m_EndY))
+						{
+							m_Map[AStar.OpenList.First().x, AStar.OpenList.First().y] = 4;
 
+						}
+						AStar.OpenList.RemoveAt(0);
+					}
+					else
+					{
+						m_IsPlaying = 2;
+					}
+				}
 			}
+			else
+			{
+				if (!(m_DrawX == m_EndX && m_DrawY == m_EndY))
+				{
+					m_Map[m_DrawX, m_DrawY] = 3;
 
-			var tmpX = m_DrawX;
-			var tmpY = m_DrawY;
-			if (m_AStar)
-			{
-				m_DrawX = AStar.Parent[tmpX, tmpY].x;
-				m_DrawY = AStar.Parent[tmpX, tmpY].y;
-			}
-			else if(m_JPS)
-			{
-				m_DrawX = JPS.Parent[tmpX, tmpY].x;
-				m_DrawY = JPS.Parent[tmpX, tmpY].y;
+				}
+
+				var tmpX = m_DrawX;
+				var tmpY = m_DrawY;
+				if (m_AStar)
+				{
+					m_DrawX = AStar.Parent[tmpX, tmpY].x;
+					m_DrawY = AStar.Parent[tmpX, tmpY].y;
+				}
+				else if(m_JPS)
+				{
+					m_DrawX = JPS.Parent[tmpX, tmpY].x;
+					m_DrawY = JPS.Parent[tmpX, tmpY].y;
+				}
+			
+				// Debug.Log(m_DrawX+":"+m_DrawY);
 			}
 			
-			// Debug.Log(m_DrawX+":"+m_DrawY);
 		}
 	}
 
@@ -181,6 +206,9 @@ public class GameManager : MonoBehaviour
 						break;
 					case (int) MAPMARKER.PATH:
 						m_Box[i, j].GetComponent<MeshRenderer>().material.color = Color.yellow;
+						break;
+					case (int) MAPMARKER.OPEN:
+						m_Box[i, j].GetComponent<MeshRenderer>().material.color = Color.green;
 						break;
 				}
 			}
@@ -307,7 +335,7 @@ public class GameManager : MonoBehaviour
 		{
 			for (int j = 0; j < SizeSlider.value; ++j)
 			{
-				if (m_Map[i, j] == (int)MAPMARKER.PATH)
+				if (m_Map[i, j] == (int)MAPMARKER.PATH || m_Map[i, j] == (int)MAPMARKER.OPEN)
 				{
 					m_Map[i, j] = (int)MAPMARKER.NONE;
 				}
@@ -326,7 +354,7 @@ public class GameManager : MonoBehaviour
 		DateTime after = DateTime.Now;
 		TimeUsed.text = (after - before).ToString();
 		Debug.Log(tmp);
-		m_IsPlaying = true;
+		m_IsPlaying = 1;
 		m_DrawX = m_EndX;
 		m_DrawY = m_EndY;
 		yield return null;
