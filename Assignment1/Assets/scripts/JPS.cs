@@ -36,7 +36,7 @@ public class JPS
         new Pos(1, -1),
         new Pos(1, 1)
     };
-
+    static public List<Pos> OpenList; 
     static public Pos[,] Parent
     {
         get { return parent; }
@@ -66,6 +66,7 @@ public class JPS
         H = new int[m, n];
         closeList = new bool[m, n];
         parent = new Pos[m, n];
+        OpenList = new List<Pos>();
 
         m_openList = new PriorityQueue<int, Pos>(new Less<int>());
         for (int i = 0; i < m; ++i)
@@ -280,6 +281,8 @@ public class JPS
         if (flag == 1)
         {
             m_openList.Insert(F[pos.x, pos.y], pos);
+            OpenList.Add(pos);
+
         }
         else if(flag == 2) 
         {

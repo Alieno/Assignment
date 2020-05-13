@@ -82,7 +82,7 @@ public class PriorityQueue<KT, VT> : CBT<KeyValuePair<KT, VT>> where KT : struct
 		base.Insert(new KeyValuePair<KT, VT>(key, value));
 		int index = m_size - 1;
 		m_pos[value] = new KeyValuePair<KT, int>(key, index);
-		while (index > 0 && m_comp.Compare(m_data[index], m_data[Parent(index)]) > 0)
+		while (index > 0 && m_comp.Compare(m_data[index], m_data[Parent(index)]) >= 0)
 		{
 			int p = Parent(index);
 			ExchangePos(index, p);
@@ -115,13 +115,13 @@ public class PriorityQueue<KT, VT> : CBT<KeyValuePair<KT, VT>> where KT : struct
 			return false;
 		}
 		int index = m_pos[value].Value;
-		if (m_comp.Compare(m_data[index], new KeyValuePair<KT, VT>(priority, value)) > 0)
+		if (m_comp.Compare(m_data[index], new KeyValuePair<KT, VT>(priority, value)) >= 0)
 		{
 			return false;
 		}
 		m_pos[value] = new KeyValuePair<KT, int>(priority, index);
 		m_data[index] = new KeyValuePair<KT, VT>(priority, m_data[index].Value);
-		while (index > 0 && m_comp.Compare(m_data[index], m_data[Parent(index)]) > 0)
+		while (index > 0 && m_comp.Compare(m_data[index], m_data[Parent(index)]) >= 0)
 		{
 			int p = Parent(index);
 			ExchangePos(index, p);
@@ -144,11 +144,11 @@ public class PriorityQueue<KT, VT> : CBT<KeyValuePair<KT, VT>> where KT : struct
 		int ex = index;
 		int l = Left(index);
 		int r = Right(index);
-		if (l != -1 && m_comp.Compare(m_data[l], m_data[ex]) > 0)
+		if (l != -1 && m_comp.Compare(m_data[l], m_data[ex]) >= 0)
 		{
 			ex = l;
 		}
-		if (r != -1 && m_comp.Compare(m_data[r], m_data[ex]) > 0)
+		if (r != -1 && m_comp.Compare(m_data[r], m_data[ex]) >= 0)
 		{
 			ex = r;
 		}

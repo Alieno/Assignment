@@ -87,12 +87,17 @@ public class GameManager : MonoBehaviour
 
 	void Update()
 	{
+		
+		OnMapClick();
+		DrawColor();
+	}
+
+	private void FixedUpdate()
+	{
 		if (m_IsPlaying > 0)
 		{
 			UpdatePath();
 		}
-		OnMapClick();
-		DrawColor();
 	}
 
 	private void UpdatePath()
@@ -115,6 +120,22 @@ public class GameManager : MonoBehaviour
 
 						}
 						AStar.OpenList.RemoveAt(0);
+					}
+					else
+					{
+						m_IsPlaying = 2;
+					}
+				}
+				else if(m_JPS)
+				{
+					if (JPS.OpenList.Count > 0)
+					{
+						if (!(JPS.OpenList.First().x == m_EndX && JPS.OpenList.First().y == m_EndY))
+						{
+							m_Map[JPS.OpenList.First().x, JPS.OpenList.First().y] = 4;
+
+						}
+						JPS.OpenList.RemoveAt(0);
 					}
 					else
 					{
