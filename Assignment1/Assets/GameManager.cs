@@ -303,7 +303,7 @@ public class GameManager : MonoBehaviour
 									m_EndY = -1;
 									m_Map[tmpX,tmpY] = (int) MAPMARKER.NONE;
 									break;
-								case (int) MAPMARKER.OBSTACLE:
+								default:
 									m_Map[tmpX,tmpY] = (int) MAPMARKER.NONE;
 									break;
 							}
@@ -348,6 +348,23 @@ public class GameManager : MonoBehaviour
 	public void OnFindPathBtnClick()
 	{
 		StartCoroutine(CalculatePath());
+	}
+	
+	public void OnClearAllBtnClick()
+	{
+		for (int i = 0; i < SizeSlider.value; ++i)
+		{
+			for (int j = 0; j < SizeSlider.value; ++j)
+			{
+
+					m_Map[i, j] = (int)MAPMARKER.NONE;
+				
+			}
+		}
+		m_StartX = -1;
+		m_StartY = -1;
+		m_EndX = -1;
+		m_EndY = -1;
 	}
 
 	IEnumerator CalculatePath()
