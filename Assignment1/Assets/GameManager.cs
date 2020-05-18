@@ -29,6 +29,14 @@ public class GameManager : MonoBehaviour
 
 	public Text TimeUsed;
 	public Slider SizeSlider;
+
+	public Material Red;
+	public Material Blue;
+	public Material Green;
+	public Material Black;
+	public Material White;
+	public Material Yellow;
+	
 	
 	private GameObject[,] m_Box = new GameObject[100, 100];
 	private int[,] m_Map = new int[100,100];
@@ -214,22 +222,22 @@ public class GameManager : MonoBehaviour
 				switch (m_Map[i,j])
 				{
 					case (int) MAPMARKER.START:
-						m_Box[i,j].GetComponent<MeshRenderer>().material.color = Color.red;
+						m_Box[i,j].GetComponent<MeshRenderer>().material = Red;
 						break;
 					case (int) MAPMARKER.END:
-						m_Box[i,j].GetComponent<MeshRenderer>().material.color = Color.blue;
+						m_Box[i,j].GetComponent<MeshRenderer>().material = Blue;
 						break;
 					case (int) MAPMARKER.OBSTACLE:
-						m_Box[i,j].GetComponent<MeshRenderer>().material.color = Color.black;
+						m_Box[i,j].GetComponent<MeshRenderer>().material = Black;
 						break;
 					case (int) MAPMARKER.NONE:
-						m_Box[i,j].GetComponent<MeshRenderer>().material.color = Color.white;
+						m_Box[i,j].GetComponent<MeshRenderer>().material = White;
 						break;
 					case (int) MAPMARKER.PATH:
-						m_Box[i, j].GetComponent<MeshRenderer>().material.color = Color.yellow;
+						m_Box[i, j].GetComponent<MeshRenderer>().material = Yellow;
 						break;
 					case (int) MAPMARKER.OPEN:
-						m_Box[i, j].GetComponent<MeshRenderer>().material.color = Color.green;
+						m_Box[i, j].GetComponent<MeshRenderer>().material = Green;
 						break;
 				}
 			}
